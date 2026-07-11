@@ -1,0 +1,26 @@
+{
+  "name": "Sổ Quân Số - Quản lý danh sách quân nhân",
+  "short_name": "Sổ Quân Số",
+  "description": "Ứng dụng quản lý danh sách quân nhân: thêm, sửa, xoá, tìm kiếm và lưu trữ hồ sơ.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F0EDE3",
+  "theme_color": "#4B5320",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

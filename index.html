@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4B5320">
+<title>Sổ Quân Số</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sổ Quân Số">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F0EDE3;
+    --surface:#FFFFFF;
+    --ink:#232821;
+    --ink-soft:#5B6155;
+    --hairline:#D8D2C0;
+    --olive:#4B5320;
+    --olive-dark:#3A4019;
+    --brass:#A9862B;
+    --gray:#8A8578;
+    --danger:#8C3B2E;
+    --font-display:'Oswald',sans-serif;
+    --font-body:'Inter',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .hidden{display:none !important;}
+
+  /* ===== LOGIN SCREEN ===== */
+  .login-screen{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;background:var(--olive);
+  }
+  .login-card{
+    background:var(--bg);border-radius:16px;padding:28px 24px;width:100%;max-width:360px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .login-crest{
+    width:56px;height:56px;border-radius:50%;background:var(--olive);color:#F0EDE3;
+    display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;
+  }
+  .login-card h1{
+    font-family:var(--font-display);text-align:center;font-size:20px;text-transform:uppercase;
+    letter-spacing:.03em;margin:0 0 4px;font-weight:600;
+  }
+  .login-card .sub{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-bottom:20px;}
+  .login-error{
+    background:#F6E4E0;color:var(--danger);border:1px solid #E2B6AC;border-radius:8px;
+    padding:9px 12px;font-size:12.5px;margin-bottom:14px;display:none;
+  }
+  .login-error.show{display:block;}
+  .login-loading{text-align:center;color:var(--ink-soft);font-size:13px;padding:40px 0;}
+  .spinner{
+    width:26px;height:26px;border:3px solid var(--hairline);border-top-color:var(--olive);
+    border-radius:50%;margin:0 auto 10px;animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ===== HEADER ===== */
+  header.app-header{
+    background:var(--olive);
+    color:#F0EDE3;
+    padding:calc(env(safe-area-inset-top) + 18px) 18px 16px;
+    position:sticky;top:0;z-index:20;
+    box-shadow:0 2px 0 var(--olive-dark);
+  }
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0;}
+  .crest{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;flex-shrink:0;
+    border:2px solid rgba(240,237,227,.5);
+  }
+  .brand h1{
+    font-family:var(--font-display);
+    font-size:19px;letter-spacing:.04em;
+    margin:0;text-transform:uppercase;font-weight:600;
+  }
+  .brand .unit-name{
+    font-size:11.5px;opacity:.8;margin-top:1px;font-family:var(--font-mono);letter-spacing:.02em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .header-actions{display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{
+    background:rgba(240,237,227,.14);
+    border:1px solid rgba(240,237,227,.3);
+    color:#F0EDE3;width:38px;height:38px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:16px;flex-shrink:0;
+  }
+  .icon-btn:active{background:rgba(240,237,227,.28);}
+  .role-strip{
+    display:flex;align-items:center;gap:6px;margin-top:12px;
+    font-size:11.5px;opacity:.85;
+  }
+  .role-pill{
+    background:rgba(240,237,227,.16);border:1px solid rgba(240,237,227,.28);
+    border-radius:20px;padding:3px 10px;font-weight:500;
+  }
+  .stats-row{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:2px;}
+  .stat-chip{
+    background:rgba(240,237,227,.12);
+    border:1px solid rgba(240,237,227,.22);
+    border-radius:8px;padding:7px 12px;flex-shrink:0;min-width:78px;
+  }
+  .stat-chip .num{font-family:var(--font-display);font-size:18px;font-weight:600;line-height:1;}
+  .stat-chip .lbl{font-size:9.5px;opacity:.75;text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+
+  /* ===== TOOLBAR ===== */
+  .toolbar{padding:14px 16px 6px;}
+  .search-wrap{position:relative;}
+  .search-wrap input{
+    width:100%;padding:11px 14px 11px 36px;border-radius:9px;
+    border:1px solid var(--hairline);background:var(--surface);
+    font-family:var(--font-body);font-size:14.5px;color:var(--ink);
+  }
+  .search-wrap input:focus{outline:2px solid var(--olive);outline-offset:1px;}
+  .search-wrap::before{
+    content:"⌕";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    color:var(--ink-soft);font-size:17px;
+  }
+  .filter-row{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px;}
+  .filter-chip{
+    flex-shrink:0;padding:6px 13px;border-radius:20px;border:1px solid var(--hairline);
+    background:var(--surface);font-size:12.5px;font-weight:500;color:var(--ink-soft);
+    cursor:pointer;white-space:nowrap;
+  }
+  .filter-chip.active{background:var(--olive);border-color:var(--olive);color:#fff;}
+  .filter-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:600;margin:10px 0 -2px;}
+
+  /* ===== LIST ===== */
+  main{padding:10px 16px 100px;max-width:760px;margin:0 auto;}
+  .sync-note{
+    display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);
+    padding:4px 2px 10px;
+  }
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--olive);flex-shrink:0;}
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--ink-soft);
+  }
+  .empty-state .glyph{font-size:34px;margin-bottom:10px;opacity:.5;}
+  .empty-state h3{font-family:var(--font-display);margin:0 0 6px;color:var(--ink);font-weight:600;letter-spacing:.02em;}
+  .empty-state p{font-size:13.5px;margin:0;line-height:1.5;}
+
+  .card{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:11px;
+    padding:13px 14px;margin-bottom:9px;display:flex;gap:12px;align-items:flex-start;
+    cursor:pointer;position:relative;
+  }
+  .card:active{background:#FAF8F2;}
+  .rank-tag{
+    flex-shrink:0;width:48px;height:48px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;
+    font-family:var(--font-mono);font-weight:600;
+    color:#fff;position:relative;
+  }
+  .rank-tag::after{
+    content:"";position:absolute;inset:3px;border:1px dashed rgba(255,255,255,.4);border-radius:5px;pointer-events:none;
+  }
+  .rank-tag .ab{font-size:14px;line-height:1;}
+  .rank-tag .grp{font-size:7px;opacity:.85;margin-top:2px;letter-spacing:.03em;}
+  .card-body{flex:1;min-width:0;}
+  .card-top{display:flex;align-items:baseline;justify-content:space-between;gap:6px;}
+  .card-name{font-family:var(--font-display);font-size:15.5px;font-weight:600;letter-spacing:.01em;}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .card-meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
+  .card-meta .sep{margin:0 5px;opacity:.5;}
+  .card-id{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);margin-top:4px;letter-spacing:.02em;}
+  .platoon-badge{
+    display:inline-block;background:var(--bg);border:1px solid var(--hairline);border-radius:5px;
+    padding:1px 7px;font-size:10.5px;color:var(--ink-soft);margin-top:5px;font-weight:600;
+  }
+
+  /* ===== FAB ===== */
+  .fab{
+    position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom));
+    width:56px;height:56px;border-radius:50%;background:var(--olive);color:#fff;
+    border:none;font-size:26px;box-shadow:0 4px 14px rgba(35,40,33,.35);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:15;
+  }
+  .fab:active{background:var(--olive-dark);}
+
+  /* ===== MODAL ===== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,23,15,.5);z-index:30;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .overlay.open{display:flex;}
+  .sheet{
+    background:var(--bg);width:100%;max-width:760px;max-height:92vh;
+    border-radius:16px 16px 0 0;overflow-y:auto;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom));
+    animation:slideUp .22s ease-out;
+  }
+  @keyframes slideUp{from{transform:translateY(24px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+  .sheet-header{
+    position:sticky;top:0;background:var(--bg);z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px 10px;border-bottom:1px solid var(--hairline);
+  }
+  .sheet-header h2{font-family:var(--font-display);font-size:16.5px;margin:0;letter-spacing:.02em;text-transform:uppercase;font-weight:600;}
+  .close-x{background:none;border:none;font-size:20px;color:var(--ink-soft);cursor:pointer;padding:4px 8px;}
+  .form-body{padding:16px 18px 4px;}
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;font-size:11px;font-weight:600;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;
+  }
+  .field input,.field select,.field textarea{
+    width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--hairline);
+    background:var(--surface);font-family:var(--font-body);font-size:14.5px;color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--olive);outline-offset:1px;}
+  .field textarea{resize:vertical;min-height:60px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  .field-hint{font-size:11px;color:var(--ink-soft);margin-top:5px;}
+  .form-actions{display:flex;gap:10px;padding:16px 18px 0;}
+  .btn{
+    flex:1;padding:13px;border-radius:9px;border:none;font-size:14.5px;font-weight:600;
+    cursor:pointer;font-family:var(--font-body);
+  }
+  .btn:disabled{opacity:.55;}
+  .btn-primary{background:var(--olive);color:#fff;}
+  .btn-primary:active{background:var(--olive-dark);}
+  .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--hairline);}
+  .btn-danger{background:var(--surface);color:var(--danger);border:1px solid var(--danger);}
+  .danger-zone{padding:10px 18px 0;}
+
+  /* detail view */
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 18px 0;}
+  .detail-item{background:var(--surface);border:1px solid var(--hairline);border-radius:9px;padding:10px 12px;}
+  .detail-item .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:600;}
+  .detail-item .val{font-size:14px;margin-top:3px;font-weight:500;word-break:break-word;}
+  .detail-item.full{grid-column:1 / -1;}
+
+  /* account management */
+  .account-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--surface);border:1px solid var(--hairline);border-radius:9px;
+    padding:10px 12px;margin-bottom:8px;
+  }
+  .account-row .name{font-weight:600;font-size:13.5px;}
+  .account-row .meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .account-row .del{background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:4px 8px;}
+  .section-title{font-family:var(--font-display);font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin:18px 18px 8px;font-weight:600;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#F0EDE3;padding:10px 18px;border-radius:8px;
+    font-size:13px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s, bottom .2s;
+    max-width:88vw;text-align:center;
+  }
+  .toast.show{opacity:1;bottom:calc(90px + env(safe-area-inset-bottom));}
+
+  ::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-crest">🎖️</div>
+    <h1>Sổ Quân Số</h1>
+    <div class="sub">Đăng nhập để xem/quản lý quân số</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="ten@donvi.vn" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Mật khẩu</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%;">Đăng nhập</button>
+  </div>
+</div>
+
+<!-- ================= AUTH LOADING ================= -->
+<div class="login-loading hidden" id="authLoading">
+  <div class="spinner"></div>
+  Đang kết nối...
+</div>
+
+<!-- ================= MAIN APP ================= -->
+<div id="appRoot" class="hidden">
+
+<header class="app-header">
+  <div class="brand-row">
+    <div class="brand">
+      <div class="crest">🎖️</div>
+      <div style="min-width:0;">
+        <h1>Sổ Quân Số</h1>
+        <div class="unit-name" id="unitNameDisplay">—</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="menuBtn" title="Tuỳ chọn">⋮</button>
+    </div>
+  </div>
+  <div class="role-strip">
+    <span id="userNameDisplay"></span>
+    <span class="role-pill" id="roleBadge"></span>
+  </div>
+  <div class="stats-row">
+    <div class="stat-chip"><div class="num" id="statTotal">0</div><div class="lbl">Tổng số</div></div>
+    <div class="stat-chip"><div class="num" id="statActive">0</div><div class="lbl">Tại ngũ</div></div>
+    <div class="stat-chip"><div class="num" id="statLeave">0</div><div class="lbl">Nghỉ phép</div></div>
+    <div class="stat-chip"><div class="num" id="statOut">0</div><div class="lbl">Xuất ngũ</div></div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Tìm theo tên, số hiệu, đơn vị...">
+  </div>
+  <div class="filter-row" id="filterRow">
+    <div class="filter-chip active" data-status="all">Tất cả</div>
+    <div class="filter-chip" data-status="Tại ngũ">Tại ngũ</div>
+    <div class="filter-chip" data-status="Nghỉ phép">Nghỉ phép</div>
+    <div class="filter-chip" data-status="Xuất ngũ">Xuất ngũ</div>
+  </div>
+  <div class="filter-label hidden" id="platoonFilterLabel">Trung đội</div>
+  <div class="filter-row hidden" id="platoonFilterRow"></div>
+</div>
+
+<main>
+  <div class="sync-note"><span class="sync-dot"></span><span id="syncNote">Đang đồng bộ thời gian thực</span></div>
+  <div id="listContainer"></div>
+</main>
+
+<button class="fab hidden" id="addBtn" title="Thêm quân nhân">+</button>
+
+<!-- FORM MODAL -->
+<div class="overlay" id="formOverlay">
+  <div class="sheet">
+    <div class="sheet-header">
+      <h2 id="formTitle">Thêm quân nhân</h2>
+      <button class="close-x" id="formClose">✕</button>
+    </div>
+    <div class="form-body">
+      <div class="field">
+        <label>Họ và tên *</label>
+        <input type="text" id="f_name" placeholder="Nguyễn Văn A">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Số hiệu quân nhân</label>
+          <input type="text" id="f_serial" placeholder="QN-00123">
+        </div>
+        <div class="field">
+          <label>Cấp bậc</label>
+          <select id="f_rank"></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Chức vụ</label>
+          <input type="text" id="f_position" placeholder="Tiểu đội trưởng">
+        </div>
+        <div class="field">
+          <label>Trung đội *</label>
+          <input type="text" id="f_platoon" placeholder="Trung đội 1" list="platoonSuggestions">
+          <datalist id="platoonSuggestions"></datalist>
+        </div>
+      </div>
+      <div class="field">
+        <label>Đơn vị (đại đội / tiểu đoàn)</label>
+        <input type="text" id="f_unit" placeholder="Đại đội 1, Tiểu đoàn 2">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Ngày sinh</label>
+          <input type="date" id="f_dob">
+        </div>
+        <div class="field">
+          <label>Ngày nhập ngũ</label>
+          <input type="date" id="f_enlist">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Quê quán</label>
+          <input type="text" id="f_hometown" placeholder="Tỉnh/Thành phố">
+        </div>
+        <div class="field">
+          <label>Số điện thoại</label>
+          <input type="tel" id="f_phone" placeholder="09xxxxxxxx">
+        </div>
+      </div>
+      <div class="field">
+        <label>Tình trạng</label>
+        <select id="f_status">
+          <option>Tại ngũ</option>
+          <option>Nghỉ phép</option>
+          <option>Xuất ngũ</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Ghi chú</label>
+        <textarea id="f_note" placeholder="Ghi chú thêm..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="formCancel">Huỷ</button>
+      <button class="btn btn-primary" id="formSave">Lưu</button>
+    </div>
+    <div class="danger-zone" id="deleteZone" style="display:none;">
+      <button class="btn btn-danger" id="formDelete" style="width:100%;">Xoá quân nhân này</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detailOverlay">
+  <div class="sheet">
+    <div class="sheet-header">
+      <h2>Hồ sơ quân nhân</h2>
+      <button class="close-x" id="detailClose">✕</button>
+    </div>
+    <div class="detail-grid" id="detailGrid"></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost hidden" id="detailEdit">Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MENU MODAL -->
+<div class="overlay" id="menuOverlay">
+  <div class="sheet">
+    <div class="sheet-header">
+      <h2>Tuỳ chọn</h2>
+      <button class="close-x" id="menuClose">✕</button>
+    </div>
+    <div class="form-body" id="commanderSettingsBlock">
+      <div class="field">
+        <label>Tên đơn vị (hiển thị ở đầu trang)</label>
+        <input type="text" id="unitNameInput" placeholder="VD: Đại đội 1 - Tiểu đoàn 2">
+      </div>
+      <button class="btn btn-primary" id="menuSaveBtn" style="width:100%;">Lưu tên đơn vị</button>
+    </div>
+
+    <div class="form-actions" style="padding-top:16px;">
+      <button class="btn btn-ghost" id="exportBtn">Xuất dữ liệu (.json)</button>
+    </div>
+
+    <!-- Account management: commander only -->
+    <div id="accountMgmtBlock" class="hidden">
+      <div class="section-title">Tài khoản trung đội trưởng</div>
+      <div class="form-body" style="padding-top:0;" id="accountList"></div>
+      <div class="section-title">Cấp tài khoản mới</div>
+      <div class="form-body" style="padding-top:0;">
+        <div class="field">
+          <label>Họ tên trung đội trưởng</label>
+          <input type="text" id="new_name" placeholder="Trần Văn B">
+        </div>
+        <div class="field">
+          <label>Trung đội phụ trách *</label>
+          <input type="text" id="new_platoon" placeholder="Trung đội 1" list="platoonSuggestions2">
+          <datalist id="platoonSuggestions2"></datalist>
+          <div class="field-hint">Phải khớp chính xác với "Trung đội" ghi trong hồ sơ quân nhân.</div>
+        </div>
+        <div class="field">
+          <label>Email đăng nhập</label>
+          <input type="email" id="new_email" placeholder="td1@donvi.vn">
+        </div>
+        <div class="field">
+          <label>Mật khẩu tạm thời</label>
+          <input type="text" id="new_password" placeholder="Ít nhất 6 ký tự">
+        </div>
+        <button class="btn btn-primary" id="createAccountBtn" style="width:100%;">Tạo tài khoản</button>
+      </div>
+    </div>
+
+    <div class="form-actions" style="padding-top:16px;">
+      <button class="btn btn-danger" id="logoutBtn" style="width:100%;">Đăng xuất</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- /appRoot -->
+
+<script type="module">
+// ======================================================================
+// CẤU HÌNH FIREBASE — dán thông tin project của bạn vào đây
+// (Xem hướng dẫn lấy thông tin này trong file SETUP-FIREBASE.md)
+// ======================================================================
+const firebaseConfig = {
+  apiKey: "DÁN_API_KEY_CỦA_BẠN",
+  authDomain: "DÁN_PROJECT_ID.firebaseapp.com",
+  projectId: "DÁN_PROJECT_ID",
+  storageBucket: "DÁN_PROJECT_ID.appspot.com",
+  messagingSenderId: "DÁN_SENDER_ID",
+  appId: "DÁN_APP_ID"
+};
+// ======================================================================
+
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+  createUserWithEmailAndPassword, deleteUser
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot,
+  getDoc, getDocs, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const RANKS = [
+  {ab:'B2', name:'Binh nhì', grp:'Chiến sĩ', color:'#8A8578'},
+  {ab:'B1', name:'Binh nhất', grp:'Chiến sĩ', color:'#8A8578'},
+  {ab:'HS', name:'Hạ sĩ', grp:'Hạ sĩ quan', color:'#6E7A4A'},
+  {ab:'TS', name:'Trung sĩ', grp:'Hạ sĩ quan', color:'#6E7A4A'},
+  {ab:'ThS', name:'Thượng sĩ', grp:'Hạ sĩ quan', color:'#6E7A4A'},
+  {ab:'Th.U', name:'Thiếu úy', grp:'Sĩ quan cấp úy', color:'#4B5320'},
+  {ab:'Tr.U', name:'Trung úy', grp:'Sĩ quan cấp úy', color:'#4B5320'},
+  {ab:'Th.U1', name:'Thượng úy', grp:'Sĩ quan cấp úy', color:'#4B5320'},
+  {ab:'Đ.U', name:'Đại úy', grp:'Sĩ quan cấp úy', color:'#4B5320'},
+  {ab:'Th.T', name:'Thiếu tá', grp:'Sĩ quan cấp tá', color:'#A9862B'},
+  {ab:'Tr.T', name:'Trung tá', grp:'Sĩ quan cấp tá', color:'#A9862B'},
+  {ab:'Th.T1', name:'Thượng tá', grp:'Sĩ quan cấp tá', color:'#A9862B'},
+  {ab:'Đ.T', name:'Đại tá', grp:'Sĩ quan cấp tá', color:'#A9862B'},
+];
+const STATUS_COLOR = { 'Tại ngũ': '#4B5320', 'Nghỉ phép': '#A9862B', 'Xuất ngũ': '#8A8578' };
+function rankInfo(ab){ return RANKS.find(r=>r.ab===ab) || {ab:'—', name:'Chưa rõ', grp:'', color:'#8A8578'}; }
+function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function formatDate(d){ if(!d) return '—'; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> t.classList.remove('show'), 2400);
+}
+
+const rankSelect = document.getElementById('f_rank');
+RANKS.forEach(r=>{
+  const opt = document.createElement('option');
+  opt.value = r.ab; opt.textContent = r.name;
+  rankSelect.appendChild(opt);
+});
+
+// ================== STATE ==================
+let currentUser = null;   // firebase auth user
+let profile = null;       // { role, platoon, name }
+let roster = [];          // personnel docs currently visible (already scoped by rules)
+let unsubRoster = null;
+let currentFilter = 'all';
+let currentPlatoonFilter = 'all';
+let currentSearch = '';
+let editingId = null;
+const isCommander = () => profile?.role === 'commander';
+
+// ================== AUTH FLOW ==================
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.classList.remove('show');
+  if(!email || !password){
+    errBox.textContent = 'Vui lòng nhập email và mật khẩu.';
+    errBox.classList.add('show');
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').textContent = 'Đang đăng nhập...';
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    errBox.textContent = mapAuthError(e);
+    errBox.classList.add('show');
+  }finally{
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').textContent = 'Đăng nhập';
+  }
+}
+function mapAuthError(e){
+  const c = e?.code || '';
+  if(c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found')) return 'Sai email hoặc mật khẩu.';
+  if(c.includes('too-many-requests')) return 'Thử sai quá nhiều lần, vui lòng đợi rồi thử lại.';
+  if(c.includes('invalid-email')) return 'Email không hợp lệ.';
+  return 'Không thể đăng nhập. Kiểm tra kết nối mạng và thử lại.';
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, async (user)=>{
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('authLoading').classList.remove('hidden');
+  document.getElementById('appRoot').classList.add('hidden');
+  if(unsubRoster){ unsubRoster(); unsubRoster = null; }
+
+  if(!user){
+    currentUser = null; profile = null;
+    document.getElementById('authLoading').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    return;
+  }
+
+  currentUser = user;
+  try{
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if(!snap.exists()){
+      document.getElementById('authLoading').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      const errBox = document.getElementById('loginError');
+      errBox.textContent = 'Tài khoản chưa được cấp quyền truy cập. Liên hệ đại đội trưởng.';
+      errBox.classList.add('show');
+      await signOut(auth);
+      return;
+    }
+    profile = snap.data();
+  }catch(e){
+    document.getElementById('authLoading').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'Lỗi kết nối tới máy chủ. Vui lòng thử lại.';
+    errBox.classList.add('show');
+    await signOut(auth);
+    return;
+  }
+
+  initAppForProfile();
+});
+
+function initAppForProfile(){
+  document.getElementById('authLoading').classList.add('hidden');
+  document.getElementById('appRoot').classList.remove('hidden');
+
+  document.getElementById('userNameDisplay').textContent = profile.name || currentUser.email;
+  document.getElementById('roleBadge').textContent = isCommander() ? 'Đại đội trưởng' : `Trung đội trưởng · ${profile.platoon || ''}`;
+
+  document.getElementById('addBtn').classList.toggle('hidden', !isCommander());
+  document.getElementById('accountMgmtBlock').classList.toggle('hidden', !isCommander());
+  document.getElementById('platoonFilterLabel').classList.toggle('hidden', !isCommander());
+  document.getElementById('platoonFilterRow').classList.toggle('hidden', !isCommander());
+
+  listenUnitName();
+  listenRoster();
+  if(isCommander()){
+    listenAccounts();
+  }
+}
+
+// ================== UNIT NAME (settings/main) ==================
+function listenUnitName(){
+  onSnapshot(doc(db, 'settings', 'main'), snap=>{
+    const name = snap.exists() ? (snap.data().unitName || '') : '';
+    document.getElementById('unitNameDisplay').textContent = name || 'Chưa đặt tên đơn vị';
+    document.getElementById('unitNameInput').value = name;
+  }, ()=>{ /* platoon leader has read access per rules; ignore errors silently */ });
+}
+document.getElementById('menuSaveBtn')?.addEventListener('click', async ()=>{
+  const val = document.getElementById('unitNameInput').value.trim();
+  try{
+    await setDoc(doc(db, 'settings', 'main'), { unitName: val }, { merge: true });
+    showToast('Đã lưu tên đơn vị');
+  }catch(e){ showToast('Không có quyền hoặc lỗi kết nối'); }
+});
+
+// ================== ROSTER (real-time) ==================
+function listenRoster(){
+  const q = query(collection(db, 'personnel'), orderBy('name'));
+  unsubRoster = onSnapshot(q, snap=>{
+    roster = snap.docs.map(d=>({ id: d.id, ...d.data() }));
+    if(!isCommander()){
+      roster = roster.filter(p => p.platoon === profile.platoon);
+    }
+    rebuildPlatoonFilterChips();
+    render();
+  }, err=>{
+    showToast('Lỗi đồng bộ dữ liệu: ' + (err.code || err.message));
+  });
+}
+
+function rebuildPlatoonFilterChips(){
+  if(!isCommander()) return;
+  const row = document.getElementById('platoonFilterRow');
+  const platoons = [...new Set(roster.map(p=>p.platoon).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'vi'));
+  const prevActive = currentPlatoonFilter;
+  row.innerHTML = `<div class="filter-chip${prevActive==='all'?' active':''}" data-platoon="all">Tất cả</div>` +
+    platoons.map(p=>`<div class="filter-chip${prevActive===p?' active':''}" data-platoon="${escapeHtml(p)}">${escapeHtml(p)}</div>`).join('');
+}
+document.getElementById('platoonFilterRow').addEventListener('click', e=>{
+  const chip = e.target.closest('.filter-chip');
+  if(!chip) return;
+  document.querySelectorAll('#platoonFilterRow .filter-chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  currentPlatoonFilter = chip.dataset.platoon;
+  render();
+});
+
+// ================== RENDER LIST ==================
+function render(){
+  const container = document.getElementById('listContainer');
+  let items = roster.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||'', 'vi'));
+
+  if(currentFilter !== 'all') items = items.filter(p => p.status === currentFilter);
+  if(isCommander() && currentPlatoonFilter !== 'all') items = items.filter(p => p.platoon === currentPlatoonFilter);
+  if(currentSearch.trim()){
+    const q = currentSearch.trim().toLowerCase();
+    items = items.filter(p =>
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.serial||'').toLowerCase().includes(q) ||
+      (p.unit||'').toLowerCase().includes(q) ||
+      (p.platoon||'').toLowerCase().includes(q) ||
+      (p.position||'').toLowerCase().includes(q)
+    );
+  }
+
+  document.getElementById('statTotal').textContent = roster.length;
+  document.getElementById('statActive').textContent = roster.filter(p=>p.status==='Tại ngũ').length;
+  document.getElementById('statLeave').textContent = roster.filter(p=>p.status==='Nghỉ phép').length;
+  document.getElementById('statOut').textContent = roster.filter(p=>p.status==='Xuất ngũ').length;
+
+  if(items.length === 0){
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="glyph">⌕</div>
+        <h3>${roster.length===0 ? 'Chưa có quân nhân nào' : 'Không tìm thấy kết quả'}</h3>
+        <p>${roster.length===0
+          ? (isCommander() ? 'Nhấn nút "+" ở góc dưới để thêm quân nhân đầu tiên vào sổ.' : 'Trung đội của bạn chưa có quân nhân nào trong sổ.')
+          : 'Thử từ khoá hoặc bộ lọc khác.'}</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = items.map(p=>{
+    const r = rankInfo(p.rank);
+    const sc = STATUS_COLOR[p.status] || '#8A8578';
+    return `
+    <div class="card" data-id="${p.id}">
+      <div class="rank-tag" style="background:${r.color}">
+        <div class="ab">${r.ab}</div>
+        <div class="grp">${r.grp}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-name">${escapeHtml(p.name || '(Chưa có tên)')}</div>
+          <div class="status-dot" style="background:${sc}" title="${p.status}"></div>
+        </div>
+        <div class="card-meta">${escapeHtml(r.name)}${p.position ? ' <span class="sep">·</span> '+escapeHtml(p.position):''}</div>
+        ${p.serial ? `<div class="card-id">${escapeHtml(p.serial)}</div>` : ''}
+        ${isCommander() && p.platoon ? `<div class="platoon-badge">${escapeHtml(p.platoon)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  container.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', ()=> openDetail(card.dataset.id));
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', e=>{ currentSearch = e.target.value; render(); });
+document.getElementById('filterRow').addEventListener('click', e=>{
+  const chip = e.target.closest('.filter-chip');
+  if(!chip) return;
+  document.querySelectorAll('#filterRow .filter-chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  currentFilter = chip.dataset.status;
+  render();
+});
+
+// ================== FORM (commander only — enforced by hidden FAB + Firestore rules) ==================
+const formOverlay = document.getElementById('formOverlay');
+function refreshPlatoonSuggestions(){
+  const platoons = [...new Set(roster.map(p=>p.platoon).filter(Boolean))];
+  ['platoonSuggestions','platoonSuggestions2'].forEach(id=>{
+    const dl = document.getElementById(id);
+    if(dl) dl.innerHTML = platoons.map(p=>`<option value="${escapeHtml(p)}">`).join('');
+  });
+}
+function openForm(person){
+  editingId = person ? person.id : null;
+  document.getElementById('formTitle').textContent = person ? 'Chỉnh sửa hồ sơ' : 'Thêm quân nhân';
+  document.getElementById('f_name').value = person?.name || '';
+  document.getElementById('f_serial').value = person?.serial || '';
+  document.getElementById('f_rank').value = person?.rank || RANKS[0].ab;
+  document.getElementById('f_position').value = person?.position || '';
+  document.getElementById('f_platoon').value = person?.platoon || '';
+  document.getElementById('f_unit').value = person?.unit || '';
+  document.getElementById('f_dob').value = person?.dob || '';
+  document.getElementById('f_enlist').value = person?.enlist || '';
+  document.getElementById('f_hometown').value = person?.hometown || '';
+  document.getElementById('f_phone').value = person?.phone || '';
+  document.getElementById('f_status').value = person?.status || 'Tại ngũ';
+  document.getElementById('f_note').value = person?.note || '';
+  document.getElementById('deleteZone').style.display = person ? 'block' : 'none';
+  refreshPlatoonSuggestions();
+  formOverlay.classList.add('open');
+}
+function closeForm(){ formOverlay.classList.remove('open'); editingId = null; }
+
+document.getElementById('addBtn').addEventListener('click', ()=> openForm(null));
+document.getElementById('formClose').addEventListener('click', closeForm);
+document.getElementById('formCancel').addEventListener('click', closeForm);
+formOverlay.addEventListener('click', e=>{ if(e.target === formOverlay) closeForm(); });
+
+document.getElementById('formSave').addEventListener('click', async ()=>{
+  const name = document.getElementById('f_name').value.trim();
+  const platoon = document.getElementById('f_platoon').value.trim();
+  if(!name){ showToast('Vui lòng nhập họ và tên'); document.getElementById('f_name').focus(); return; }
+  if(!platoon){ showToast('Vui lòng nhập Trung đội'); document.getElementById('f_platoon').focus(); return; }
+
+  const data = {
+    name,
+    serial: document.getElementById('f_serial').value.trim(),
+    rank: document.getElementById('f_rank').value,
+    position: document.getElementById('f_position').value.trim(),
+    platoon,
+    unit: document.getElementById('f_unit').value.trim(),
+    dob: document.getElementById('f_dob').value,
+    enlist: document.getElementById('f_enlist').value,
+    hometown: document.getElementById('f_hometown').value.trim(),
+    phone: document.getElementById('f_phone').value.trim(),
+    status: document.getElementById('f_status').value,
+    note: document.getElementById('f_note').value.trim(),
+    updatedAt: serverTimestamp(),
+  };
+  const saveBtn = document.getElementById('formSave');
+  saveBtn.disabled = true;
+  try{
+    if(editingId){
+      await updateDoc(doc(db, 'personnel', editingId), data);
+      showToast('Đã cập nhật hồ sơ');
+    } else {
+      data.createdAt = serverTimestamp();
+      await setDoc(doc(collection(db, 'personnel')), data);
+      showToast('Đã thêm quân nhân mới');
+    }
+    closeForm();
+  }catch(e){
+    showToast('Không thể lưu: ' + (e.code || 'lỗi kết nối'));
+  }finally{
+    saveBtn.disabled = false;
+  }
+});
+
+document.getElementById('formDelete').addEventListener('click', async ()=>{
+  if(!editingId) return;
+  if(confirm('Xoá hồ sơ này khỏi sổ quân số? Hành động không thể hoàn tác.')){
+    try{
+      await deleteDoc(doc(db, 'personnel', editingId));
+      closeForm();
+      showToast('Đã xoá khỏi sổ quân số');
+    }catch(e){ showToast('Không thể xoá: ' + (e.code || 'lỗi kết nối')); }
+  }
+});
+
+// ================== DETAIL MODAL ==================
+const detailOverlay = document.getElementById('detailOverlay');
+let detailId = null;
+function openDetail(id){
+  const p = roster.find(x=>x.id===id);
+  if(!p) return;
+  detailId = id;
+  const r = rankInfo(p.rank);
+  const fields = [
+    ['Cấp bậc', r.name],
+    ['Trạng thái', p.status],
+    ['Trung đội', p.platoon || '—'],
+    ['Số hiệu QN', p.serial || '—'],
+    ['Chức vụ', p.position || '—'],
+    ['Đơn vị', p.unit || '—', true],
+    ['Ngày sinh', formatDate(p.dob)],
+    ['Ngày nhập ngũ', formatDate(p.enlist)],
+    ['Quê quán', p.hometown || '—'],
+    ['Số điện thoại', p.phone || '—'],
+  ];
+  let html = `<div class="detail-item full"><div class="lbl">Họ và tên</div><div class="val" style="font-family:var(--font-display);font-size:17px;">${escapeHtml(p.name)}</div></div>`;
+  fields.forEach(([lbl,val,full])=>{
+    html += `<div class="detail-item${full?' full':''}"><div class="lbl">${lbl}</div><div class="val">${escapeHtml(val)}</div></div>`;
+  });
+  if(p.note) html += `<div class="detail-item full"><div class="lbl">Ghi chú</div><div class="val">${escapeHtml(p.note)}</div></div>`;
+  document.getElementById('detailGrid').innerHTML = html;
+  document.getElementById('detailEdit').classList.toggle('hidden', !isCommander());
+  detailOverlay.classList.add('open');
+}
+function closeDetail(){ detailOverlay.classList.remove('open'); detailId = null; }
+document.getElementById('detailClose').addEventListener('click', closeDetail);
+detailOverlay.addEventListener('click', e=>{ if(e.target===detailOverlay) closeDetail(); });
+document.getElementById('detailEdit').addEventListener('click', ()=>{
+  const p = roster.find(x=>x.id===detailId);
+  closeDetail();
+  openForm(p);
+});
+
+// ================== MENU ==================
+const menuOverlay = document.getElementById('menuOverlay');
+document.getElementById('menuBtn').addEventListener('click', ()=> menuOverlay.classList.add('open'));
+document.getElementById('menuClose').addEventListener('click', ()=> menuOverlay.classList.remove('open'));
+menuOverlay.addEventListener('click', e=>{ if(e.target===menuOverlay) menuOverlay.classList.remove('open'); });
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(roster, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `so-quan-so-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Đã xuất file dữ liệu');
+});
+
+// ================== ACCOUNT MANAGEMENT (commander only) ==================
+function listenAccounts(){
+  onSnapshot(collection(db, 'users'), snap=>{
+    const list = snap.docs
+      .map(d=>({ id: d.id, ...d.data() }))
+      .filter(u=>u.role === 'platoon_leader');
+    const box = document.getElementById('accountList');
+    if(list.length === 0){
+      box.innerHTML = `<div class="field-hint">Chưa có tài khoản trung đội trưởng nào.</div>`;
+    } else {
+      box.innerHTML = list.map(u=>`
+        <div class="account-row">
+          <div>
+            <div class="name">${escapeHtml(u.name || u.email)}</div>
+            <div class="meta">${escapeHtml(u.platoon)} · ${escapeHtml(u.email)}</div>
+          </div>
+          <button class="del" data-uid="${u.id}" title="Xoá quyền truy cập">✕</button>
+        </div>`).join('');
+      box.querySelectorAll('.del').forEach(btn=>{
+        btn.addEventListener('click', ()=> revokeAccount(btn.dataset.uid));
+      });
+    }
+  });
+}
+
+async function revokeAccount(uid){
+  if(!confirm('Thu hồi quyền truy cập của tài khoản này? (Tài khoản đăng nhập vẫn tồn tại nhưng sẽ không xem được dữ liệu nữa)')) return;
+  try{
+    await deleteDoc(doc(db, 'users', uid));
+    showToast('Đã thu hồi quyền truy cập');
+  }catch(e){ showToast('Không thể thu hồi: ' + (e.code || 'lỗi kết nối')); }
+}
+
+document.getElementById('createAccountBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('new_name').value.trim();
+  const platoon = document.getElementById('new_platoon').value.trim();
+  const email = document.getElementById('new_email').value.trim();
+  const password = document.getElementById('new_password').value;
+  if(!platoon || !email || !password){
+    showToast('Vui lòng điền đủ Trung đội, Email và Mật khẩu'); return;
+  }
+  if(password.length < 6){ showToast('Mật khẩu cần tối thiểu 6 ký tự'); return; }
+
+  const btn = document.getElementById('createAccountBtn');
+  btn.disabled = true; btn.textContent = 'Đang tạo...';
+
+  // Dùng một Firebase app phụ để tạo tài khoản mới mà không làm mất phiên đăng nhập hiện tại
+  const secondaryApp = initializeApp(firebaseConfig, 'Secondary-' + Date.now());
+  const secondaryAuth = getAuth(secondaryApp);
+  try{
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    const newUid = cred.user.uid;
+    await setDoc(doc(db, 'users', newUid), {
+      role: 'platoon_leader',
+      platoon, name, email,
+      createdAt: serverTimestamp(),
+    });
+    await signOut(secondaryAuth);
+    showToast('Đã tạo tài khoản trung đội trưởng');
+    document.getElementById('new_name').value = '';
+    document.getElementById('new_platoon').value = '';
+    document.getElementById('new_email').value = '';
+    document.getElementById('new_password').value = '';
+  }catch(e){
+    const c = e.code || '';
+    if(c.includes('email-already-in-use')) showToast('Email này đã được dùng cho tài khoản khác');
+    else if(c.includes('invalid-email')) showToast('Email không hợp lệ');
+    else showToast('Không thể tạo tài khoản: ' + c);
+  }finally{
+    await deleteApp(secondaryApp);
+    btn.disabled = false; btn.textContent = 'Tạo tài khoản';
+  }
+});
+
+// ================== SERVICE WORKER ==================
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

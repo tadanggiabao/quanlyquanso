@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isCommander() {
+      return isSignedIn() && myProfile().role == 'commander';
+    }
+    function myPlatoon() {
+      return myProfile().platoon;
+    }
+
+    // --- Tài khoản người dùng (vai trò + trung đội phụ trách) ---
+    match /users/{userId} {
+      // Ai cũng được đọc hồ sơ CỦA CHÍNH MÌNH (để biết vai trò); đại đội trưởng đọc được tất cả
+      allow read: if isSignedIn() && (request.auth.uid == userId || isCommander());
+      // Chỉ đại đội trưởng được tạo / sửa / xoá tài khoản (kể cả của chính mình)
+      allow create, update, delete: if isCommander();
+    }
+
+    // --- Danh sách quân nhân ---
+    match /personnel/{docId} {
+      // Đại đội trưởng đọc tất cả; trung đội trưởng chỉ đọc hồ sơ thuộc trung đội mình
+      allow read: if isSignedIn() && (isCommander() || resource.data.platoon == myPlatoon());
+      // Chỉ đại đội trưởng được thêm / sửa / xoá
+      allow create, update, delete: if isCommander();
+    }
+
+    // --- Cấu hình chung (tên đơn vị...) ---
+    match /settings/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isCommander();
+    }
+
+    // Mặc định: chặn tất cả những gì không khớp luật ở trên
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
