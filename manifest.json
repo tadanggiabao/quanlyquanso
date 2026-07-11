@@ -1,6 +1,6 @@
 {
-  "name": "Ứng dụng Quân Số - Quản lý danh sách quân nhân",
-  "short_name": "Quản lý Quân Số",
+  "name": "Quân Số - Quản lý danh sách quân nhân",
+  "short_name": "Sổ Quân Số",
   "description": "Ứng dụng quản lý danh sách quân nhân: thêm, sửa, xoá",
   "start_url": "./index.html",
   "scope": "./",
@@ -13,13 +13,13 @@
     {
       "src": "icon-vn.png",
       "sizes": "192x192",
-      "type": "icon-vn/png",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
       "src": "icon-vn.png",
       "sizes": "512x512",
-      "type": "icon-vn/png",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
